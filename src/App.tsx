@@ -1,16 +1,24 @@
 import React, { createContext, useContext, useState, useRef } from 'react'
 import {
-    Text,
     useColorScheme,
     View,
     StatusBar,
-    Button,
-    TouchableOpacity,
     TouchableWithoutFeedback,
     Animated,
+    TouchableOpacity,
+    Text,
 } from 'react-native'
 
-import styled from 'styled-components/native'
+import {
+    CenterCount,
+    CenterView,
+    ButtonContainer,
+    ButtonText,
+    OptionItem,
+    OptionText,
+    OptionsTitle,
+    SmallButton,
+} from './StyledComponents'
 
 type runningState = 'running' | 'paused' | 'reset'
 
@@ -27,7 +35,6 @@ const App: React.FC = () => {
 
     const [repTime, setRepTime] = useState(1)
     const [currentRep, setCurrentRep] = useState(0)
-    const [targetReps, setTargetReps] = useState(42)
 
     const intervalRef = useRef(0)
 
@@ -78,9 +85,7 @@ const App: React.FC = () => {
                 }}>
                 <StatusBar backgroundColor="#000" />
                 <CenterView>
-                    <CenterCount>
-                        {currentRep < 10 ? '0' + currentRep.toString() : currentRep}
-                    </CenterCount>
+                    <CenterCount>{currentRep < 10 ? '0' + currentRep.toString() : currentRep}</CenterCount>
 
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <OptionsTitle>Select Timing :</OptionsTitle>
@@ -92,9 +97,7 @@ const App: React.FC = () => {
                                         setRepTime(option)
                                     }}>
                                     <OptionItem isSelected={option === repTime}>
-                                        <OptionText isSelected={option === repTime}>
-                                            {option.toString()}s
-                                        </OptionText>
+                                        <OptionText isSelected={option === repTime}>{option.toString()}s</OptionText>
                                     </OptionItem>
                                 </TouchableWithoutFeedback>
                             ))}
@@ -102,6 +105,9 @@ const App: React.FC = () => {
                     </Animated.View>
                 </CenterView>
 
+                <TouchableOpacity onPress={() => handleStart()}>
+                    <Text>Start</Text>
+                </TouchableOpacity>
                 <ButtonView />
             </View>
         </RunningState.Provider>
@@ -129,60 +135,5 @@ const ButtonView: React.FC = () => {
         </ButtonContainer>
     )
 }
-
-const CenterView = styled.View`
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-const CenterCount = styled.Text`
-    font-family: 'Inter-Light';
-    letter-spacing: -20px;
-    font-size: 240px;
-    text-align: center;
-    color: white;
-`
-
-const ButtonContainer = styled.TouchableOpacity`
-    position: absolute;
-    bottom: 50px;
-    background-color: '#2cd8ce';
-    padding: 15px;
-    width: 350px;
-    border-radius: 15px;
-`
-
-const SmallButton = styled(ButtonContainer)`
-    width: 200px;
-    position: relative;
-`
-
-const ButtonText = styled.Text`
-    font-family: 'Inter-Medium';
-    text-align: center;
-    font-size: 20px;
-    color: black;
-    text-transform: uppercase;
-`
-
-const OptionItem = styled.View`
-    margin: 5px;
-    border-radius: 5px;
-    padding: 5px 10px;
-    background-color: ${(props: { isSelected: boolean }) =>
-        props.isSelected ? '#ffffffdd' : '#ffffff44'};
-`
-
-const OptionText = styled.Text`
-    font-family: 'Inter-Bold';
-    color: ${(props: { isSelected: boolean }) => (props.isSelected ? 'black' : 'white')};
-`
-
-const OptionsTitle = styled.Text`
-    font-family: 'Inter-Regular';
-    color: white;
-    margin: 5px;
-`
 
 export default App
