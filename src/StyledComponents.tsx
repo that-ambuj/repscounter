@@ -16,18 +16,27 @@ export const CenterCount = styled.Text`
     color: white;
 `
 
-export const ButtonContainer = styled.TouchableOpacity`
+export const ButtonContainer = styled.TouchableOpacity.attrs({ activeOpacity: 0.7 })`
     position: absolute;
-    bottom: 50px;
-    background-color: '#2cd8ce';
+    bottom: 40px;
+    background-color: ${(props: { color: string }) => props.color || '#2cd8ce'};
     padding: 15px;
     width: 350px;
     border-radius: 15px;
 `
 
 export const SmallButton = styled(ButtonContainer)`
-    width: 200px;
+    width: 160px;
     position: relative;
+    margin: 0px 10px;
+`
+
+export const SmallButtonView = styled.View`
+    position: absolute;
+    bottom: 0px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
 `
 
 export const ButtonText = styled.Text`
@@ -54,5 +63,5 @@ export const OptionText = styled.Text`
 export const OptionsTitle = styled.Text`
     font-family: 'Inter-Regular';
     color: white;
-    margin: 5px;
+    argin: 5px;
 `

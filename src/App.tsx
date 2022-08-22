@@ -18,11 +18,31 @@ import {
     OptionText,
     OptionsTitle,
     SmallButton,
+    SmallButtonView,
 } from './StyledComponents'
 
 type runningState = 'running' | 'paused' | 'reset'
 
-const RunningState = createContext('reset')
+interface RunningStateContext {
+    runningState: runningState
+    setRunningState: React.Dispatch<React.SetStateAction<runningState>>
+}
+
+interface HandlerFunctionsContext {
+    handleStart: () => void
+    handlePause: () => void
+    handleReset: () => void
+}
+
+const RunningState = createContext<RunningStateContext>({
+    runningState: 'reset',
+    setRunningState: () => null,
+})
+const HandlerFunctions = createContext<HandlerFunctionsContext>({
+    handleStart: () => null,
+    handlePause: () => null,
+    handleReset: () => null,
+})
 
 const App: React.FC = () => {
     const isDarkMode = useColorScheme() === 'dark'
@@ -42,13 +62,11 @@ const App: React.FC = () => {
 
     const handleStart = () => {
         setRunningState('running')
-
         Animated.timing(fadeAnim, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
         }).start()
-
         clearInterval(intervalRef.current)
         intervalRef.current = setInterval(() => {
             setCurrentRep(prev => prev + 1)
@@ -57,19 +75,16 @@ const App: React.FC = () => {
 
     const handlePause = () => {
         setRunningState('paused')
-
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 200,
             useNativeDriver: true,
         }).start()
-
         clearInterval(intervalRef.current)
     }
 
     const handleReset = () => {
         setRunningState('reset')
-
         clearInterval(intervalRef.current)
         setCurrentRep(0)
     }
@@ -77,60 +92,75 @@ const App: React.FC = () => {
     const options = [1, 2, 3, 5, 7, 10]
 
     return (
-        <RunningState.Provider value={runningState}>
-            <View
-                style={{
-                    flex: 1,
-                    backgroundColor: '#000',
-                }}>
-                <StatusBar backgroundColor="#000" />
-                <CenterView>
-                    <CenterCount>{currentRep < 10 ? '0' + currentRep.toString() : currentRep}</CenterCount>
+        <RunningState.Provider value={{ runningState, setRunningState }}>
+            <HandlerFunctions.Provider value={{ handleStart, handlePause, handleReset }}>
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: '#000',
+                    }}>
+                    <StatusBar backgroundColor="#000" />
+                    <CenterView>
+                        <CenterCount>
+                            {currentRep < 10 ? '0' + currentRep.toString() : currentRep}
+                        </CenterCount>
 
-                    <Animated.View style={{ opacity: fadeAnim }}>
-                        <OptionsTitle>Select Timing :</OptionsTitle>
-                        <View style={{ display: 'flex', flexDirection: 'row' }}>
-                            {options.map(option => (
-                                <TouchableWithoutFeedback
-                                    key={option}
-                                    onPress={() => {
-                                        setRepTime(option)
-                                    }}>
-                                    <OptionItem isSelected={option === repTime}>
-                                        <OptionText isSelected={option === repTime}>{option.toString()}s</OptionText>
-                                    </OptionItem>
-                                </TouchableWithoutFeedback>
-                            ))}
-                        </View>
-                    </Animated.View>
-                </CenterView>
-
-                <TouchableOpacity onPress={() => handleStart()}>
-                    <Text>Start</Text>
-                </TouchableOpacity>
-                <ButtonView />
-            </View>
+                        <Animated.View style={{ opacity: fadeAnim }}>
+                            <OptionsTitle>Select Timing :</OptionsTitle>
+                            <View style={{ display: 'flex', flexDirection: 'row' }}>
+                                {options.map(option => (
+                                    <TouchableWithoutFeedback
+                                        key={option}
+                                        onPress={() => {
+                                            setRepTime(option)
+                                        }}>
+                                        <OptionItem isSelected={option === repTime}>
+                                            <OptionText isSelected={option === repTime}>
+                                                {option.toString()}s
+                                            </OptionText>
+                                        </OptionItem>
+                                    </TouchableWithoutFeedback>
+                                ))}
+                            </View>
+                        </Animated.View>
+                        <ButtonView />
+                    </CenterView>
+                </View>
+            </HandlerFunctions.Provider>
         </RunningState.Provider>
     )
 }
 
 const ButtonView: React.FC = () => {
-    const runningState = useContext(RunningState)
+    const { runningState, setRunningState } = useContext(RunningState)
+    const { handleStart, handlePause, handleReset } = useContext(HandlerFunctions)
 
     console.log(runningState)
 
+    if (runningState === 'running') {
+        return (
+            <ButtonContainer color="#f0723d" onPress={() => handlePause()}>
+                <ButtonText>Pause</ButtonText>
+            </ButtonContainer>
+        )
+    }
+
     if (runningState === 'paused') {
         return (
-            <View>
-                <SmallButton>
+            <SmallButtonView>
+                <SmallButton color="#df4e4e" onPress={() => handleReset()}>
+                    <ButtonText>Reset</ButtonText>
+                </SmallButton>
+
+                <SmallButton color="#c7c7c7" onPress={() => handleStart()}>
                     <ButtonText>Resume</ButtonText>
                 </SmallButton>
-            </View>
+            </SmallButtonView>
         )
     }
 
     return (
-        <ButtonContainer>
+        <ButtonContainer onPress={() => handleStart()}>
             <ButtonText>Start</ButtonText>
         </ButtonContainer>
     )
